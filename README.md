@@ -3,7 +3,7 @@ uhm.. well... server pulls notifications from supplied facebook RSS feed, client
 
 Run the server in a screen session somewhere nice, like on an ubuntu server or something that isn't too firewalled, and has python on it.
 
-Run it with the command '''./bukseryster.py "urlToFaceBookNotificationsRSSFeed"'''
+Run it with the command ```./bukseryster.py "urlToFaceBookNotificationsRSSFeed"```
 
 You can find your facebook notifications RSS feed url by googling how to find your facebook notifications RSS feed url
 
