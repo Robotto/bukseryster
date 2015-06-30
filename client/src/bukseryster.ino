@@ -1,7 +1,8 @@
-//FONA TEST
+//bukseryster.ino
+//pulls number of facebook notifications from robottobox and alerts the user's underpants by means of a vibrator
+//change server IP and port on line 121.
 
-
-enum fonaStates { //default state should be "get_data"
+enum fonaStates {
 	off,
 	on,
 	connected,
@@ -10,26 +11,19 @@ enum fonaStates { //default state should be "get_data"
 
 //APN settings for /some/ danish service providers: http://www.appsandroid.dk/apn-indstillinger-mmsgprs.html
 
-//PINOUT:
+//FONA PINOUT:
 //int VioPin=X; //determines I/O voltage, set to VCC of arduino
 int KeyPin=16; //power on/off pin - pull to GND for 2 seconds to toggle power for FONA
 int PSPin=14; //Power status pin 0=off 1=on
 int NSPin=10; //Network status pin:
-/*  NSPIN:
-	64ms on, 800ms off - the module is running but hasn't made connection to the cellular network yet
-	64ms on, 3 seconds off - the module has made contact with the cellular network and can send/receive voice and SMS
-	64ms on, 300ms off - the GPRS data connection you requested is active
-	By watching the blinks you can get a visual feedback on whats going on.
-*/
 int ResetPin=15; //Pull low for 100ms to hard reset the fona
 //int RIPin=X; //Ring indicator pin, will pulse low for 120ms when a call is received. It can also be configured to pulse when an SMS is received.
 
-
 int vibratorPin=3;
 
-String rx="";
-unsigned long statusTimer=0;
-fonaStates status=off;
+String rx=""; //placeholder for string to integer conversion
+unsigned long statusTimer=0; //for telling what state the fona board is in
+fonaStates status=off; //startup state is off.. probably..
 
 void setup()
 {
@@ -45,7 +39,7 @@ void setup()
 	TX_RX_LED_INIT; //built in macro for the pro micro (leonardo)
 	pinMode(PSPin,INPUT);
 	pinMode(NSPin,INPUT);
-	digitalWrite(KeyPin,HIGH);
+	digitalWrite(KeyPin,HIGH); //set high before setting to output, to avoid low-pulse and accidentally powering on the FONA too soon
 	pinMode(KeyPin,OUTPUT);
 	pinMode(ResetPin,OUTPUT);
 	pinMode(vibratorPin,OUTPUT);
@@ -62,8 +56,7 @@ void setup()
 
 	while(status==off) ShowSerialData();
 
-	Serial.println("Fona on..");
-
+	Serial.println("Fona is on..");
 
 	Serial.println("Awaiting status: Connected.");
 	while(status!=connected) ShowSerialData();
@@ -73,7 +66,6 @@ void setup()
 	ShowSerialData();
 	ShowSerialData();
 	ShowSerialData();
-
 
 	Serial1.println("at+cstt=\"internet\""); //configure GPRS
 	delay(1000);
@@ -85,9 +77,9 @@ void setup()
 	Serial.println();
 	ShowSerialData();
 	Serial.println();
+
 	Serial.println("Awaiting Active GPRS connection.");
 	while(status!=gprsActive) ShowSerialData();
-
 	delay(1000);
 
 	Serial1.println("at+cifsr"); //get IP address
@@ -104,8 +96,7 @@ void loop()
 	for(int i=0;i<likes;i++) buzz(1000); //one buzz per like
 	Serial.print("Notifications: ");
 	Serial.println(likes);
-
-	delay(300000); //5 minutes
+    delay(300000); //5 minutes
 
 }
 void buzz(int duration)
@@ -120,7 +111,7 @@ void ShowSerialData()
 {
   while(Serial1.available()!=0)
   {
-    delay(50);
+    delay(50); //seems to fit the timing of the FONA board nicely
     Serial.write(Serial1.read());
   }
 }
@@ -130,14 +121,9 @@ int getLikes(void)
 	Serial1.println("at+cipstart=\"tcp\",\"62.212.66.171\",\"31337\""); //init conn
 	delay(1000);
 	ShowSerialData();
-
-	//while(!Serial1.find("OK")); 
 	Serial1.println("at+cipsend"); //send some data
 	delay(250);
-
 	ShowSerialData();
-	//while(!Serial1.find("OK"));
-	//while(!Serial1.find("CONNECT OK"));
 	Serial1.print("yes hello.");
 	ShowSerialData();
 	Serial1.println((char)26);
@@ -172,11 +158,8 @@ int getLikes(void)
 void updateFonaStatus(void)
 {
 	unsigned long timeSinceLastRisingEdge=millis()-statusTimer;
-
 	if(timeSinceLastRisingEdge>1500) status=connected;
 	else if(timeSinceLastRisingEdge>500) status=on;
 	else status=gprsActive;
-
 	statusTimer=millis();
-
 }
