@@ -13,7 +13,6 @@ if len(sys.argv) == 1:
 	sys.exit(1)
 
 feedUrl=sys.argv[1]
-loopDelay=15
 
 #get the feed and parse it:
 def getNotifications(url):
@@ -78,7 +77,7 @@ while True:
             conn.send(str(newNotifications))  # echo
             print 'TX:',newNotifications
             newNotifications=0
-            
+
         print 'Client disconnected.'
         print '--------------------------'
         conn.close()
