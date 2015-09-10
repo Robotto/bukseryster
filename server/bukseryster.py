@@ -62,9 +62,9 @@ while True:
     try:
         conn, addr = s.accept()
         print time.ctime(),'Connection from:', addr
-        while 1:
+        while True: #looks like connection timeout is ~60 seconds.
 
-            print time.ctime(),'Poking facebook...'
+             print time.ctime(),'Poking facebook...'
             newTimeStamps=getStamps(getNotifications(feedUrl))
             diff=[]
             if len(newTimeStamps)>0:
@@ -78,8 +78,11 @@ while True:
             newNotifications=0
             time.sleep(30)
 
-        print 'Client disconnected.'
+        #print 'Client disconnected.'
+        #print '--------------------------'
+        #conn.close()
+    except Exception as e:
+        #print "hmm.. It looks like there was an error: " + str(e)
+        print time.ctime(),'Client disconnected... :',str(e)
         print '--------------------------'
         conn.close()
-    except Exception as e:
-        print "hmm.. It looks like there was an error: " + str(e)
