@@ -64,7 +64,7 @@ while True:
         print time.ctime(),'Connection from:', addr
         while True: #looks like connection timeout is ~60 seconds.
 
-             print time.ctime(),'Poking facebook...'
+            print time.ctime(),'Poking facebook...'
             newTimeStamps=getStamps(getNotifications(feedUrl))
             diff=[]
             if len(newTimeStamps)>0:
