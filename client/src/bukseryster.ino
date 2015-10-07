@@ -6,8 +6,7 @@ enum fonaStates {
 	off,
 	on,
 	connected,
-	gprsActive,
-	TCPconnected
+	gprsActive
 };
 
 
@@ -38,16 +37,16 @@ int vibratorPin=3;
 
 String rx=""; //placeholder for string to integer conversion
 unsigned long statusTimer=0; //for telling what state the fona board is in
-unsigned long startupTime;
+unsigned long TCPaliveAtThisTime;
 fonaStates status=off; //startup state is off.. probably..
 
 void setup()
 {
-	while(!Serial);
+	//while(!Serial);
 
 	Serial.begin(115200);
 	Serial1.begin(19200);
-	Serial1.setTimeout(3000);
+	Serial1.setTimeout(5000);
 
 	Serial.println("power up.");
 
@@ -130,31 +129,33 @@ void setup()
 		while(openTCPconn())
 			{
 				Serial.println("attempt to establish TCP connection failed. Retrying in 5 seconds...");
-				Serial.print("Fona responded with: ");
-				ShowSerialData();
 			}
 		}
 
 	Serial.println("Connected to robottobox!");
-	status=TCPconnected;
-	startupTime=millis();
+	TCPaliveAtThisTime=millis();
 }
 
 
 
 void loop()
 {
-	if(millis()>startupTime+60000) {//for every 60 seconds
+	if(millis()>TCPaliveAtThisTime+60000) { //for every 60 seconds
 		Serial1.println("AT+CIPSTATUS");
 		if(!Serial1.find("CONNECT OK")) {
 			while(openTCPconn()) {
 				Serial.println("attempt to establish TCP connection failed. Retrying in 5 seconds...");
 				}
 			}
+		delay(1000);
+		ShowSerialData();
+		ShowSerialData();
+		ShowSerialData();
+		TCPaliveAtThisTime=millis();
 		}
 
 	if(Serial1.available()) {
-		int likes=getLikes();
+		int likes=Serial1.parseInt();
 		for(int i=0;i<likes;i++) buzz(1000); //one buzz per like
 		Serial.print("Notifications: ");
 		Serial.println(likes);
@@ -215,14 +216,19 @@ int getLikes(void)
 	delay(2500);
 	*/
 	//HERE's where the magic happens:
+
+	/*
 	String rx="";
 
 	rx += (char)Serial1.read();
-	Serial.print("RX!: ");
-	Serial.print(rx);
+	//Serial.print("RX!: ");
+	//Serial.print(rx);
 	int likes = rx.toInt();
 
 	//End of magic
+	*/
+
+	int likes = Serial.parseInt();
 
 	return likes;
 
