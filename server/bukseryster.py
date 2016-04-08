@@ -3,6 +3,7 @@ import feedparser
 import urllib2
 import time
 import datetime
+from dateutil.parser import parse #to handle timezone offset.
 import socket
 from IPy import IP
 import sys
@@ -36,7 +37,11 @@ def getStamps(notifications):
     stamps=[]
     for i in range(len(notifications)):
                                     #rfc2822#section-3.3 format: "Tue, 26 May 2015 15:58:39 -0100"
-        stamps.append(time.mktime(time.strptime(notifications[i], "%a, %d %b %Y %H:%M:%S -0100")))
+        #stamps.append(time.mktime(time.strptime(notifications[i], "%a, %d %b %Y %H:%M:%S %z")))
+        dateTimeObj=parse(notifications[i]) #the dateutil.parser handles %z (timezone) nicely, but the resulting datetime.datetime object needs to be converted to a tuple to be parsed as an epoch.. sigh...
+        epoch = time.mktime(dateTimeObj.timetuple())
+        #print epoch
+        stamps.append(dateTimeObj)
     return stamps
 
 #STARTUP:
