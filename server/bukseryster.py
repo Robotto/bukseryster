@@ -41,7 +41,7 @@ def getStamps(notifications):
         dateTimeObj=parse(notifications[i]) #the dateutil.parser handles %z (timezone) nicely, but the resulting datetime.datetime object needs to be converted to a tuple to be parsed as an epoch.. sigh...
         epoch = time.mktime(dateTimeObj.timetuple())
         #print epoch
-        stamps.append(dateTimeObj)
+        stamps.append(epoch)
     return stamps
 
 #STARTUP:
