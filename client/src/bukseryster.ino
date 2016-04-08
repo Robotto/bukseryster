@@ -29,7 +29,7 @@ AT+CIPSTART="TCP","www.google.com","80"<CR>
 //int VioPin=X; //determines I/O voltage, set to VCC of arduino
 int KeyPin=16; //power on/off pin - pull to GND for 2 seconds to toggle power for FONA
 int PSPin=14; //Power status pin 0=off 1=on
-int NSPin=10; //Network status pin:
+int NSPin=7; //Network status pin:
 int ResetPin=15; //Pull low for 100ms to hard reset the fona
 //int RIPin=X; //Ring indicator pin, will pulse low for 120ms when a call is received. It can also be configured to pulse when an SMS is received.
 
@@ -42,7 +42,7 @@ fonaStates status=off; //startup state is off.. probably..
 
 void setup()
 {
-	//while(!Serial);
+	// while(!Serial);
 
 	Serial.begin(115200);
 	Serial1.begin(19200);
@@ -52,10 +52,12 @@ void setup()
 
 	//set up I/O:
 	TX_RX_LED_INIT; //built in macro for the pro micro (leonardo)
-	pinMode(PSPin,INPUT);
-	pinMode(NSPin,INPUT);
+	pinMode(PSPin,INPUT_PULLUP);
+	pinMode(NSPin,INPUT_PULLUP);
 	digitalWrite(KeyPin,HIGH); //set high before setting to output, to avoid low-pulse and accidentally powering on the FONA too soon
 	pinMode(KeyPin,OUTPUT);
+	digitalWrite(ResetPin,HIGH);
+
 	pinMode(ResetPin,OUTPUT);
 	pinMode(vibratorPin,OUTPUT);
 
@@ -65,7 +67,7 @@ void setup()
 	{
 		Serial.println("Fona is off.. Turning on..");
 		digitalWrite(KeyPin,LOW);
-		delay(2000);
+		delay(2500);
 		digitalWrite(KeyPin,HIGH);
 	}
 
@@ -76,7 +78,9 @@ void setup()
 	Serial.println("Fona is on..");
 
 	Serial.println("Awaiting status: Connected.");
+
 	while(status!=connected) ShowSerialData();
+
 	Serial.println("Connected!");
 
 	delay(2500);
@@ -243,8 +247,11 @@ int getLikes(void)
 */
 void updateFonaStatus(void)
 {
+	if     (statusTimer==0) {statusTimer=millis(); return;} //first run?
+
 	unsigned long timeSinceLastRisingEdge=millis()-statusTimer;
-	if(timeSinceLastRisingEdge>1500) status=connected;
+
+	if     (timeSinceLastRisingEdge>1500) status=connected;
 	else if(timeSinceLastRisingEdge>500) status=on;
 	else status=gprsActive;
 	statusTimer=millis();
