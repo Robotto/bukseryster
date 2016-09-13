@@ -7,7 +7,7 @@ Run it with the command ```./bukseryster.py "urlToFaceBookNotificationsRSSFeed"`
 
 You can find your facebook notifications RSS feed url by googling how to find your facebook notifications RSS feed url
 
-Run the client on an arduino connected to an Adafruit FONA board, (any SIM800 based board should do nicely)
+Run the client on an ESP8266 equipped board.
 
 Happy hacking
 
